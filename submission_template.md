@@ -118,16 +118,70 @@ Confidence & unknowns: High confidence in identified issues. Unknowns include bu
 ## 1) Code Review Findings
 ### Critical bugs
 - 
+Overly simplistic validation
+Only checks for "@" in the string.
+Examples that wrongly pass:
+
+"@"
+
+"a@"
+
+"@b"
+
+"a@b@"
+
+" @ "
+
+"a@b."
+
+"a@.com"
+
+"@example.com"
+
+
+Type safety issue
+If email is not a string (e.g., None, 123, {"email": "a@b.com"}),
+"@" in email raises TypeError.
+
+Does not ignore invalid entries safely
+Non-string entries cause a crash, not a skip.
 
 ### Edge cases & risks
 - 
+Multiple @ signs – Strings like "a@@b.com" would be incorrectly accepted.
+
+Spaces in email – "a @b.com" passes validation (invalid per standard email specs).
+
+No dot in domain – "a@b" is counted as valid (most email systems require a dot in the domain).
+
+Empty local or domain part – "@example.com" and "local@" are incorrectly counted.
+
+Special characters – Not explicitly handled; may be acceptable depending on spec.
+
+Extreme lengths – No length validation; extremely long strings could cause performance issues.
 
 ### Code quality / design issues
 - 
+Misleading function name and explanation
+Function claims to count valid email addresses, but validation is far below RFC standards.
+
+No input validation
+
+Assumes emails is a list of strings.
+
+Poor separation of concerns – Validation logic is intertwined with iteration, making it difficult to test or reuse.
 
 ## 2) Proposed Fixes / Improvements
 ### Summary of changes
 - 
+Basic email format validation – Require exactly one "@", non-empty local and domain parts, at least one dot in domain (not at start/end), and no spaces.
+
+Type safety – Skip non-string entries silently.
+
+Length sanity check – Reject strings shorter than 3 or longer than 254 characters (per RFC 5321).
+
+Clear separation – Validation logic is explicit and readable within the loop; could be extracted to a helper function if needed.
+
 
 ### Corrected code
 See `correct_task2.py`
@@ -138,15 +192,34 @@ See `correct_task2.py`
 ### Testing Considerations
 If you were to test this function, what areas or scenarios would you focus on, and why?
 
+Non-string entries – Ensure they are skipped without crashing.
+
+Valid email formats – Standard cases ("a@b.com", "name@domain.co.uk") should pass.
+
+Invalid but previously accepted – "@", "a@", "@b.com", "a@b", "a @b.com", "a@@b.com" should all be rejected.
+
+Edge formats – Long emails, emails with dots adjacent to @, international characters (if allowed).
+
+Empty input – Empty list returns 0.
+
+Performance – Large lists should process in O(n) time without memory spikes.
+
+
 ## 3) Explanation Review & Rewrite
 ### AI-generated explanation (original)
 > This function counts the number of valid email addresses in the input list. It safely ignores invalid entries and handles empty input correctly.
 
 ### Issues in original explanation
 - 
+Incorrect validity claim – The validation criterion ("@" present) is insufficient for determining a valid email address.
+
+Overstates safety – It does not “safely ignore” non-string entries; it crashes on them.
+
+Missing nuance – Does not mention the simplistic nature of the check or its limitations.
 
 ### Rewritten explanation
 - 
+This function counts strings that meet basic email format rules: exactly one "@", non-empty local and domain parts, at least one dot in the domain (not at start/end), no spaces, and reasonable length. Non‑string entries are silently skipped.
 
 ## 4) Final Judgment
 - Decision: Approve / Request Changes / Reject
@@ -154,6 +227,14 @@ If you were to test this function, what areas or scenarios would you focus on, a
 - Confidence & unknowns:
 
 ---
+Decision: Reject
+
+Justification: The original validation logic is fundamentally inadequate for counting valid emails and crashes on non‑string input. A complete rewrite with reasonable email checks is required.
+
+Confidence & unknowns: High confidence in the identified flaws. Unknown: whether strict RFC‑5322 validation is expected; chosen a pragmatic, minimal set of rules that catches common invalid patterns.
+
+
+
 
 # Task 3 — Aggregate Valid Measurements
 

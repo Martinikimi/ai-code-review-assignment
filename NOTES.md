@@ -42,3 +42,29 @@ valid_amounts = [
 if not valid_amounts:
     return 0.0
 return sum(valid_amounts) / len(valid_amounts)
+
+
+
+
+## Task 2 – Count Valid Emails
+
+### Assumptions Made
+1. **Validity definition** – “Valid email” is interpreted as a string meeting basic format rules, not full RFC‑5322 compliance.
+2. **No regex preference** – Used explicit string checks for readability and transparency over regex.
+3. **Length limits** – Enforced RFC‑5321 maximum length (254 chars) and a minimum of 3 chars to filter obvious non‑emails.
+4. **Domain dot requirement** – Required at least one dot in domain, and dot cannot be at start/end of domain (common invalid patterns).
+5. **Space prohibition** – Disallowed spaces anywhere in the email, as they are invalid in standard email addresses.
+
+### Design Trade‑Offs Considered
+- **Strictness vs. simplicity** – Could have added more checks (e.g., valid TLDs, quoted local parts, plus‑addressing), but chose minimal set that catches most invalid patterns.
+- **Regex vs. manual checks** – Regex would be shorter but harder to debug; explicit checks make validation steps transparent.
+- **Return value for invalid input** – Non‑list input returns 0; considered raising `TypeError` but kept fail‑silent for batch processing resilience.
+
+### Limitations
+- Does not validate against official RFC‑5322 grammar (e.g., comments, quoted strings, IP‑literal domains).
+- Does not check DNS MX records or whether domain actually exists.
+- Unicode and internationalized email addresses are handled only to the extent Python strings allow; no special normalization.
+
+### Alternative Approach (Not Implemented)
+Using a lightweight third‑party library like `email-validator` would be robust but violates “no external dependencies” implied constraint.
+Alternatively, a single regex could replace manual checks but would reduce readability and debuggability.
