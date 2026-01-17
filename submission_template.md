@@ -2,7 +2,7 @@
 
 ## Candidate
 - Name: Martin Ikimi Kimani
-- Approximate time spent:
+- Approximate time spent: 80 minutes
 
 ---
 
@@ -87,7 +87,9 @@ Non‑list iterables — Tuples, generators should work (if iterable and support
 Status edge cases — "cancelled" vs "canceled", case sensitivity, None status
 
 ## 3) Explanation Review & Rewrite
+
 ### AI-generated explanation (original)
+
 > This function calculates average order value by summing the amounts of all non-cancelled orders and dividing by the number of orders. It correctly excludes cancelled orders from the calculation.
 
 ### Issues in original explanation
